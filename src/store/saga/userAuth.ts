@@ -26,7 +26,6 @@ function* fetchUserAsync(action: FetchUserActionType) {
     console.log({ username, password });
 
     // Do api call here
-    yield delay(2000); // you can remove this
 
     const data = {
       username: username,
@@ -55,7 +54,10 @@ function* fetchUserAsync(action: FetchUserActionType) {
 
 export function* logout() {
   try {
-    yield delay(100); // you can remove this
+    yield delay(1000); // This is to save multiple requests as saga offers debounce functionality out of the box
+
+    // To understand debounce functionality Hit logout button multiple times withing 1 second and this console will be only printed once
+    console.log('Logout Request');
 
     clearLocalStorage();
 
