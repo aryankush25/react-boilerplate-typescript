@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import { isNilOrEmpty } from './helper';
+import { isNilOrEmpty, isPresent } from './helper';
+import { encryptWithAES, decryptWithAES } from './cryptoJsHelpers';
 
 export const MY_WEB_APP_TOKENS = 'my-web-app-tokens'; // Change name according to your project
 const TOKENS = ['username', 'accessToken', 'refreshToken'];
@@ -19,12 +20,28 @@ export const setLocalStorageTokens = (tokens: LocalStorageTokensProps) => {
     tokensToSet[`${token}`] = newTokensValues[`${token}`];
   });
 
-  localStorage.setItem(MY_WEB_APP_TOKENS, JSON.stringify(tokensToSet));
+  localStorage.setItem(
+    MY_WEB_APP_TOKENS,
+    encryptWithAES(JSON.stringify(tokensToSet))
+  );
 };
 
 export const getLocalStorageTokens = () => {
   const currentTokensString = localStorage.getItem(MY_WEB_APP_TOKENS);
-  const currentTokensObject = JSON.parse(`${currentTokensString}`);
+
+  let currentTokensObject = {};
+
+  if (isPresent(currentTokensString)) {
+    const decryptString = decryptWithAES(`${currentTokensString}`);
+
+    if (isPresent(decryptString)) {
+      try {
+        currentTokensObject = JSON.parse(decryptString);
+      } catch (error) {
+        currentTokensObject = {};
+      }
+    }
+  }
 
   const returnTokens: LocalStorageTokensProps = {
     username: '',
